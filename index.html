@@ -119,18 +119,34 @@
 			function applyHistory() {
 				var target = history[historyPtr];
 				for(var i=0; i<fmx; i++) map[i] = target[i].slice();
-				// 画面再描画処理
+				
+				// 1. 盤面全体を白でクリア（枠線ごと消去）
 				ofc.fillStyle=cw;
 				ofc.fillRect(fx, fy, ds*fmx, ds*fmy);
+				
+				// 2. 枠線（グリッド）を再描画
+				ofc.fillStyle=cl; // 細いグレーの線
+				for(var i=1;i<fmx;i++) if(i%5!=0) ofc.fillRect(fx+i*ds, fy, 1, ds*fmy);
+				for(var i=1;i<fmy;i++) if(i%5!=0) ofc.fillRect(fx, fy+i*ds, ds*fmx, 1);
+				ofc.fillStyle=cm; // 5マスごとの赤い太線
+				for(var i=5;i<fmx;i+=5) ofc.fillRect(fx+i*ds, fy, 1, ds*fmy);
+				for(var i=5;i<fmy;i+=5) ofc.fillRect(fx, fy+i*ds, ds*fmx, 1);
+				
+				// 3. 外枠を再描画
+				ofc.fillStyle = cf;
+				ofc.fillRect(fx,fy,ds*fmx,1);
+				ofc.fillRect(fx,fy,1,ds*fmy);
+				ofc.fillRect(fx,fy+ds*fmy,ds*fmx,1);
+				ofc.fillRect(fx+ds*fmx,fy,1,ds*fmy+1);
+
+				// 4. 保存された map 状態に従って塗り・バツを再描画
 				for(var i=0; i<fmx; i++) {
 					for(var j=0; j<fmy; j++) {
 						var val = map[i][j];
-						if(val == 1) {
+						if(val == 1) { // 塗り
 							ofc.fillStyle=cf;
 							ofc.fillRect(fx+i*ds+1,fy+j*ds+1,ds-1,ds-1);
-						} else if(val == 2) {
-							ofc.fillStyle=cw;
-							ofc.fillRect(fx+i*ds+1,fy+j*ds+1,ds-1,ds-1);
+						} else if(val == 2) { // バツ印
 							ofc.beginPath(); ofc.lineWidth=0.5; ofc.strokeStyle=cf;
 							ofc.moveTo(fx+i*ds+3,fy+j*ds+3); ofc.lineTo(fx+i*ds+ds-2,fy+j*ds+ds-2);
 							ofc.moveTo(fx+i*ds+ds-2,fy+j*ds+3); ofc.lineTo(fx+i*ds+3,fy+j*ds+ds-2);
@@ -138,7 +154,7 @@
 						}
 					}
 				}
-				updateField();
+				updateField(); // 画面を更新
 			}
 			/* --- Undo/Redo 機能の追加領域ここまで --- */
 
